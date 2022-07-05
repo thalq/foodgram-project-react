@@ -99,6 +99,17 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     'LOGIN_FIELD': 'email',
+    'HIDE_USERS': False,
+    'PERMISSIONS': {
+        'user':  ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
+        'user_list':  ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
+    },
+    'SERIALIZERS': {
+        'user': 'api.serializers.UserSerializer',
+        'user_list': 'api.serializers.UserSerializer',
+        'current_user': 'api.serializers.UserSerializer',
+        'user_create': 'api.serializers.UserSerializer',
+    },
 }
 
 LANGUAGE_CODE = 'ru-RU'
