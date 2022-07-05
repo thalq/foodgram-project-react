@@ -11,4 +11,3 @@ class UserAdmin(auth.admin.UserAdmin):
     search_fields = ('username', 'email')
     list_filter = ('first_name', 'email')
     save_on_top = True
-
