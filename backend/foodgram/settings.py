@@ -25,7 +25,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
-    # 'djoser',
+    'djoser',
 
     'users.apps.UsersConfig',
 ]
@@ -97,6 +97,9 @@ REST_FRAMEWORK = {
     ),
 }
 
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+}
 
 LANGUAGE_CODE = 'ru-RU'
 
