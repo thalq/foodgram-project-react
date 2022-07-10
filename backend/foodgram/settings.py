@@ -12,7 +12,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list = []
 
 
 INSTALLED_APPS = [
@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'djoser',
 
     'users.apps.UsersConfig',
+    'recipes.apps.RecipesConfig',
 ]
 
 MIDDLEWARE = [

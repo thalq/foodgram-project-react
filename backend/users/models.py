@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models.functions import Length
 from django.contrib.auth.models import AbstractUser
 
-# models.CharField.register_lookup(Length)
+models.CharField.register_lookup(Length)
 
 class User(AbstractUser):
     email = models.EmailField(
