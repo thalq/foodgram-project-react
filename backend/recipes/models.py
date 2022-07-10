@@ -11,6 +11,5 @@ class Tag(models.Model):
         verbose_name_plural = 'теги'
         ordering = ('name',)
 
-
     def __str__(self):
         return self.name
