@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from djoser.views import UserViewSet as DjoserViewSet
 from rest_framework import viewsets, permissions
 
-from .serializers import TagSerializer, UserSerializer 
-from recipes.models import Tag
+from .serializers import TagSerializer, UserSerializer, IngredientSerializer
+from recipes.models import Tag, Ingredient
 
 User = get_user_model()
 
@@ -19,3 +19,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TagSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
+
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
