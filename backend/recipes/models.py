@@ -1,5 +1,7 @@
-from unicodedata import name
+from django.core.validators import MinValueValidator
 from django.db import models
+
+from foodgram.constants import MIN_COOKING_TIME
 
 
 class Tag(models.Model):
@@ -32,3 +34,66 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Recipe(models.Model):
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='IngredientInRecipe',
+        verbose_name='Ингредиенты',
+        related_name='recipes',
+    )
+    tags  = models.ManyToManyField(
+        Tag,
+        related_name='recipes',
+        verbose_name='Теги',
+    )
+    image = models.ImageField('Изображение', upload_to='images/')
+    name = models.CharField('Название', max_length=200)
+    text = models.TextField('Описание рецепта',)
+    cooking_time = models.PositiveIntegerField(
+        'Время приготовления в минутах',
+        validators=(
+            MinValueValidator(
+                MIN_COOKING_TIME,
+                'Время приготовления не может быть менее одной минуты.'
+            ),
+        ),
+    )
+
+    class Meta:
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
+        ordering = ('-pk',)
+    
+    def __str__(self):
+        return self.name
+
+
+class IngredientInRecipe(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name='Ингредиент',
+        related_name='ingredients_in_recipe',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+        related_name='ingredients_in_recipe',
+    )
+    amount = models.PositiveIntegerField(
+        'Количество',
+    )
+
+    class Meta:
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
+        ordering = ('-pk',)
+    
+    def __str__(self):
+        return (
+            f'{self.ingredient.name}'
+            f'{self.amount} {self.ingredient.measurement_unit}'
+        )
