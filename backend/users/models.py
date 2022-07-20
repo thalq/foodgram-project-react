@@ -1,13 +1,9 @@
-from asyncio import constants
-from operator import mod
-import re
-from tabnanny import verbose
-from tkinter import CASCADE
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.functions import Length
-from django.contrib.auth.models import AbstractUser
 
 models.CharField.register_lookup(Length)
+
 
 class User(AbstractUser):
     """
@@ -90,6 +86,6 @@ class Subscribe(models.Model):
                 name='\nНельзя подписаться на себя\n',
             ),
         )
-    
+
     def __str__(self) -> str:
         return f'{self.user} подписан на {self.author}'
