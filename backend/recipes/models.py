@@ -105,15 +105,19 @@ class IngredientInRecipe(models.Model):
     )
     amount = models.PositiveIntegerField(
         'Количество',
+        default=0
     )
 
     class Meta:
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
         ordering = ('-pk',)
+        
     
     def __str__(self):
         return (
             f'{self.ingredient.name}'
             f'{self.amount} {self.ingredient.measurement_unit}'
         )
+
+

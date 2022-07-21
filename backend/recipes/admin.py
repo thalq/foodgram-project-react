@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 from .models import Ingredient, IngredientInRecipe, Recipe, Tag
 
@@ -25,9 +26,17 @@ class IngredientInRecipeInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    fields = ('name', 'tags', 'image', 'text', 'cooking_time', 'author')
+    list_display = ('name', 'author', 'get_image')
+    fields = ('name', 'tags',
+              'image', 'text',
+              'cooking_time', 'author')
     search_fields = ('name', 'tags')
     list_filter = ('name', 'tags')
-    inlines = [IngredientInRecipeInline]
+    inlines = (IngredientInRecipeInline,)
     
+    def get_image(self, obj):
+        if not obj.image:
+            return 'No image'
+        return mark_safe(f'<img src={obj.image.url} width="50" height="50">')
+    
+    get_image.short_description = 'Фото'

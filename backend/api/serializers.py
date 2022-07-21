@@ -1,6 +1,7 @@
 from string import hexdigits
 
 from django.contrib.auth import get_user_model
+from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
@@ -129,11 +130,16 @@ class IngredientsInRecipeSerializer(serializers.ModelSerializer):
             'measurement_unit',
             'amount',
         )
+        read_only_fields = ("name", "measurement_unit")
+
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(read_only=True, many=True)
     author = UserSerializer(read_only=True)
     ingredients = IngredientSerializer(read_only=True, many=True)
+    is_favorited = serializers.SerializerMethodField()
+    # is_in_shopping_cart = serializers.SerializerMethodField()
+    # image = Base64ImageField()
 
     class Meta:
         model = Recipe
@@ -143,9 +149,33 @@ class RecipeSerializer(serializers.ModelSerializer):
             'author',
             'ingredients',
             'is_favorited',
-            'is_in_shopping_cart',
+            # 'is_in_shopping_cart',
             'name',
             'image',
             'text',
             'cooking_time',
         )
+        read_only_fields = (
+            'is_favorite',
+        #     'is_shopping_cart',
+        )
+
+    def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return user.favorites.filter(id=obj.id).exists()
+
+    # def create(self, validated_data):
+
+    def create_ingredients(self, ingredients, recipe):
+        for ingredient in ingredients:
+            IngredientInRecipe.objects.get_or_create(
+                recipe=recipe,
+                ingredients=ingredient['ingredient'],
+                amount=ingredient['amount']
+            )
+    
+    # def create()
+
+            
