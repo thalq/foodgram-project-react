@@ -1,40 +1,67 @@
 from django.contrib.auth import get_user_model
-
-from djoser.views import UserViewSet as DjoserViewSet
-from rest_framework import viewsets, permissions, filters
+from django.db import models
+from django.shortcuts import get_object_or_404
 from django_filters import rest_framework
+from djoser.views import UserViewSet as DjoserViewSet
+from recipes.models import Ingredient, Tag
+from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
+                                   HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED)
 
-from .serializers import TagSerializer, UserSerializer, IngredientSerializer, SubscribeSerializer
-from recipes.models import Tag, Ingredient
-from users.models import Subscribe
+from api.serializers import (IngredientSerializer, TagSerializer,
+                             UserSerializer, UserSubscribeSerializer)
+
 from .mixins import CreateDeleteMixin
+from .paginators import LimitPageNumberPagination
 
 User = get_user_model()
 
 
 class UserViewSet(DjoserViewSet):
-    queryset = User.objects.all().order_by('-date_joined')
+    queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = LimitPageNumberPagination
+    additional_serializer = UserSubscribeSerializer
 
-    @action(detail=True, methods=['get', 'delete'],
-            serializer_class=SubscribeSerializer,
-            permission_classes=[permissions.IsAuthenticated]
+    @action(
+        methods=('POST', 'DELETE',),
+        detail=True,
+    )
+    def subscribe(self, request, **kwargs):
+        user = self.request.user
+        if user.is_anonymous:
+            return Response(status=HTTP_401_UNAUTHORIZED)
+        obj = get_object_or_404(self.request, id=kwargs.get('id'))
+        serializer = self.additional_serializer(
+            obj, context={'request': self.request}
+        )
+        if self.request.method == 'POST':
+            user.subscribing.add(obj)
+            return Response(serializer.data, status=HTTP_201_CREATED)
+        if self.request.method == 'DELETE':
+            user.subscribing.remove(obj)
+            return Response(status=HTTP_204_NO_CONTENT)
+        return Response(status=HTTP_400_BAD_REQUEST)
+            
+    @action(
+        methods=('GET',),
+        detail=False,
+    )
+    def subscriptions(self, request):
+        user = request.user
+        authors = user.subscribing.all()
+        pages = self.paginate_queryset(authors)
+        if pages:
+            serializer = UserSubscribeSerializer(
+                pages, many=True, context={'request': request}
             )
-    def subscribe(self, request, id=None):
-        user = self.request.user
-        author = self.get_object()
-
-
-class SubscribeViewSet(CreateDeleteMixin):
-    serializer_class = SubscribeSerializer
-    filter_backends = (rest_framework.DjangoFilterBackend,)
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return Subscribe.objects.filter(
-            subscriber=user).select_related('subscriber')
+            return self.get_paginated_response(serializer.data)
+        serializer = UserSubscribeSerializer(
+                many=True, context={'request': request}
+            )
+        return Response(serializer.data)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -50,3 +77,8 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     lookup_field = 'name'
     search_fields = ('name', )
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+# class SubscribeViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = Subscribe.objects.all()
+#     serializer_class = SubscribeSerializer

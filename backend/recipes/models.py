@@ -1,6 +1,5 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-
 from foodgram.constants import MIN_COOKING_TIME
 
 
@@ -22,8 +21,8 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField('Ед. измерения', max_length=200)
 
     class Meta():
-        verbose_name = 'ингредиент'
-        verbose_name_plural = 'ингредиенты'
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
         ordering = ('name',)
         constraints = (
             models.UniqueConstraint(
