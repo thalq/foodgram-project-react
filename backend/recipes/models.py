@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models
 from foodgram.constants import MIN_COOKING_TIME
+from users.models import User
 
 
 class Tag(models.Model):
@@ -40,12 +41,32 @@ class Recipe(models.Model):
         Ingredient,
         through='IngredientInRecipe',
         verbose_name='Ингредиенты',
-        related_name='recipes',
+        related_name='recipes'
     )
     tags  = models.ManyToManyField(
         Tag,
         related_name='recipes',
         verbose_name='Теги',
+    )
+    author = models.ForeignKey(
+        verbose_name='Автор рецепта',
+        related_name='recipes',
+        to=User,
+        on_delete=models.CASCADE,
+    )
+    favorite = models.ManyToManyField(
+        verbose_name='Избранные рецепты',
+        related_name='favorites',
+        to=User,
+    )
+    cart = models.ManyToManyField(
+        verbose_name='Список покупок',
+        related_name='carts',
+        to=User,
+    )
+    pub_date = models.DateTimeField(
+        verbose_name='Дата публикации',
+        auto_now_add=True,
     )
     image = models.ImageField('Изображение', upload_to='images/')
     name = models.CharField('Название', max_length=200)

@@ -29,11 +29,11 @@ class UserViewSet(DjoserViewSet):
         methods=('POST', 'DELETE',),
         detail=True,
     )
-    def subscribe(self, request, **kwargs):
+    def subscribe(self, request, id):
         user = self.request.user
         if user.is_anonymous:
             return Response(status=HTTP_401_UNAUTHORIZED)
-        obj = get_object_or_404(self.request, id=kwargs.get('id'))
+        obj = get_object_or_404(self.queryset, id=id)
         serializer = self.additional_serializer(
             obj, context={'request': self.request}
         )

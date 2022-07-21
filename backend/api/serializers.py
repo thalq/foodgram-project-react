@@ -41,11 +41,11 @@ class UserSerializer(serializers.ModelSerializer):
 class ShortRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = 'id', 'name', 'image', 'cooking_time'
+        fields = 'id', 'name', 'image', 'cooking_time', 
         read_only_fields = '__all__',
 
 
-class UserSubscribeSerializer(serializers.ModelSerializer):
+class UserSubscribeSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -62,11 +62,15 @@ class UserSubscribeSerializer(serializers.ModelSerializer):
             'recipes_count',
         )
         read_only_fields = '__all__',
-    
+
     def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+    def get_recipes(self, obj):
         query_params = self.context.get('request').query_params
-        recipes_limit  = query_params.get('recipes_limit', False)
+        recipes_limit = query_params.get('recipes_limit', False)
         if recipes_limit:
+            recipes_limit = int(recipes_limit)
             recipes = Recipe.objects.filter(author=obj)[:recipes_limit]
         else:
             recipes = Recipe.objects.filter(author=obj)
