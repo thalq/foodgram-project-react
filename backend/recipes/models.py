@@ -7,7 +7,7 @@ from users.models import User
 class Tag(models.Model):
     name = models.CharField('Имя', max_length=200, unique = True)
     slug = models.SlugField('Слаг', max_length=200, unique = True)
-    color = models.CharField('Цвет', max_length=6, null = True, blank=True)
+    color = models.CharField('Цвет', max_length=7, null = True, blank=True)
 
     class Meta():
         verbose_name = 'тег'
