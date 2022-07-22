@@ -1,10 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import F, Sum
+from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserViewSet
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -15,13 +17,47 @@ from api.serializers import (IngredientSerializer, RecipeSerializer,
                              ShortRecipeSerializer, TagSerializer,
                              UserSerializer, UserSubscribeSerializer)
 
+from .filters import RecipeFilter
 from .mixins import CreateDeleteMixin
 from .paginators import LimitPageNumberPagination
 
 User = get_user_model()
 
 
-class UserViewSet(DjoserViewSet):
+class AddDeleteViewMixin:
+    """
+    Миксин, позволяющий создавать и удалять подписку/
+    рецепт в список покупок/избранный рецепт.
+    """
+    @action(
+        methods=('POST', 'DELETE',),
+        detail=True,
+    )
+    def add_del_obj(self, pk, raw):
+        user = self.request.user
+        if user.is_anonymous:
+            return Response(status=HTTP_401_UNAUTHORIZED)
+        raws = {
+            'subscribing': user.subscribing,
+            'favorites': user.favorites,
+            'carts': user.carts,
+        }
+        raw = raws[raw]
+        cur_obj = raw.filter(pk=pk).exists()
+        obj = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.additional_serializer(
+            obj, context={'request': self.request}
+        )
+        if self.request.method == 'POST' and not cur_obj:
+            raw.add(obj)
+            return Response(serializer.data, status=HTTP_201_CREATED)
+        if self.request.method == 'DELETE' and cur_obj:
+            raw.remove(obj)
+            return Response(status=HTTP_204_NO_CONTENT)
+        return Response(status=HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(DjoserViewSet, AddDeleteViewMixin):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = LimitPageNumberPagination
@@ -32,20 +68,7 @@ class UserViewSet(DjoserViewSet):
         detail=True,
     )
     def subscribe(self, request, id):
-        user = self.request.user
-        if user.is_anonymous:
-            return Response(status=HTTP_401_UNAUTHORIZED)
-        obj = get_object_or_404(self.queryset, id=id)
-        serializer = self.additional_serializer(
-            obj, context={'request': self.request}
-        )
-        if self.request.method == 'POST':
-            user.subscribing.add(obj)
-            return Response(serializer.data, status=HTTP_201_CREATED)
-        if self.request.method == 'DELETE':
-            user.subscribing.remove(obj)
-            return Response(status=HTTP_204_NO_CONTENT)
-        return Response(status=HTTP_400_BAD_REQUEST)
+        return self.add_del_obj(id, 'subscribing')
             
     @action(
         methods=('GET',),
@@ -81,34 +104,56 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet, AddDeleteViewMixin):
     queryset = Recipe.objects.select_related('author')
     serializer_class = RecipeSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = LimitPageNumberPagination
     additional_serializer = ShortRecipeSerializer
-    # filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = RecipeFilter
 
     @action(
         methods=('POST', 'DELETE',),
         detail=True,
     )
-    def favorite(self, request, **kwargs):
+    def shopping_cart(self, request, pk):
+        return self.add_del_obj(pk, 'carts')
+
+    @action(methods=('GET',), detail=False)
+    def download_shopping_cart(self, request):
         user = self.request.user
-        pk = kwargs.get('pk')
-        if user.is_anonymous:
-            return Response(status=HTTP_401_UNAUTHORIZED)
-        obj = get_object_or_404(self.queryset, id=pk)
-        serializer = self.additional_serializer(
-            obj, context={'request': self.request}
+        if not user.carts.exists():
+            return Response(status=HTTP_400_BAD_REQUEST)
+        ingredients = IngredientInRecipe.objects.filter(
+            recipe__in=(user.carts.values('id'))
+        ).values(
+            ingredient_name=F('ingredient__name'),
+            measure_unit=F('ingredient__measurement_unit')
+        ).annotate(amount_cart=Sum('amount'))
+        filename = f'{user.username}_shopping_list.txt'
+        shopping_list = ("Список покупок:\n")
+
+        for ing in ingredients:
+            shopping_list += (
+                f'{ing["ingredient_name"]}: '
+                f'{ing["amount_cart"]} '
+                f'{ing["measure_unit"]}\n'
+            )
+        response = HttpResponse(
+            shopping_list, content_type='text.txt; charset=utf-8'
         )
-        if self.request.method == 'POST':
-            user.favorites.add(obj)
-            return Response(serializer.data, status=HTTP_201_CREATED)
-        if self.request.method == 'DELETE':
-            user.favorites.remove(obj)
-            return Response(status=HTTP_204_NO_CONTENT)
-        return Response(status=HTTP_400_BAD_REQUEST)
+        response['Content-Disposition'] = (
+            f'attachment; filename={filename}.txt'
+        )
+        return response
+
+    @action(
+        methods=('POST', 'DELETE',),
+        detail=True,
+    )
+    def favorite(self, request, pk):
+        return self.add_del_obj(pk, 'favorites')
 
     @action(
         methods=('GET',),
