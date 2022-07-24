@@ -1,7 +1,7 @@
 from string import hexdigits
 
 from django.contrib.auth import get_user_model
-from django.db.models import F, Sum
+from django.db.models import F
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import serializers
@@ -12,7 +12,7 @@ User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
         fields = (
@@ -24,18 +24,18 @@ class UserSerializer(serializers.ModelSerializer):
             'is_subscribed',
             'password'
         )
-        extra_kwargs = {'password': {'write_only':True}}
+        extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('is_subscribed', )
-    
+
     def create(self, validated_data):
         user = User.objects.create(**validated_data)
         user.set_password(validated_data['password'])
         user.save()
         return user
-    
+
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        if user.is_anonymous or (user==obj):
+        if user.is_anonymous or (user == obj):
             return False
         return user.subscribing.filter(id=obj.id).exists()
 
@@ -43,7 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ShortRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = 'id', 'name', 'image', 'cooking_time', 
+        fields = 'id', 'name', 'image', 'cooking_time',
         read_only_fields = '__all__',
 
 
@@ -96,7 +96,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     def validate_color(self, color):
         color = str(color).strip('#')
-        if len(color) not in (3,6):
+        if len(color) not in (3, 6):
             raise ValidationError(
                 f'Длина должна быть 3 или 6 символов, а не {len(color)}'
             )
@@ -160,7 +160,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             amount=F('ingredients_amount__amount'),
         )
         return ingredients
-        
 
     def get_is_favorited(self, obj):
         user = self.context.get('request').user

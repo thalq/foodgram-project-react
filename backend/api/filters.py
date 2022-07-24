@@ -1,10 +1,11 @@
 from django_filters.rest_framework import ChoiceFilter, FilterSet, filters
-from recipes.models import Ingredient, Recipe
+from recipes.models import Recipe
 
 RECIPE_CHOICES = (
     (0, 'False'),
     (1, 'True'),
 )
+
 
 class RecipeFilter(FilterSet):
     tags = filters.AllValuesMultipleFilter(

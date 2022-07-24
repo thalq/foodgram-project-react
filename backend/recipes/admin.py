@@ -33,10 +33,10 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = ('name', 'tags')
     list_filter = ('name', 'tags')
     inlines = (IngredientInRecipeInline,)
-    
+
     def get_image(self, obj):
         if not obj.image:
             return 'No image'
         return mark_safe(f'<img src={obj.image.url} width="50" height="50">')
-    
+
     get_image.short_description = 'Фото'

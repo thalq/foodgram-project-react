@@ -66,7 +66,7 @@ class UserViewSet(DjoserViewSet, AddDeleteViewMixin):
     )
     def subscribe(self, request, id):
         return self.add_del_obj(id, 'subscribing')
-            
+
     @action(
         methods=('GET',),
         detail=False,

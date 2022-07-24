@@ -8,17 +8,17 @@ class Tag(models.Model):
     name = models.CharField(
         'Имя',
         max_length=200,
-        unique = True,
+        unique=True,
     )
     slug = models.SlugField(
         'Слаг',
         max_length=200,
-        unique = True,
+        unique=True,
     )
     color = models.CharField(
         'Цвет',
         max_length=7,
-        null = True,
+        null=True,
         blank=True,
         default='#736283',
     )
@@ -30,6 +30,7 @@ class Tag(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Ingredient(models.Model):
     name = models.CharField('Название иградиента', max_length=200)
@@ -57,7 +58,7 @@ class Recipe(models.Model):
         verbose_name='Ингредиенты',
         related_name='recipes'
     )
-    tags  = models.ManyToManyField(
+    tags = models.ManyToManyField(
         Tag,
         related_name='recipes',
         verbose_name='Теги',
@@ -99,7 +100,7 @@ class Recipe(models.Model):
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ('-pk',)
-    
+
     def __str__(self):
         return self.name
 
@@ -126,12 +127,9 @@ class IngredientInRecipe(models.Model):
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
         ordering = ('-pk',)
-        
-    
+
     def __str__(self):
         return (
             f'{self.ingredient}'
             f'{self.amount} {self.ingredient.measurement_unit}'
         )
-
-

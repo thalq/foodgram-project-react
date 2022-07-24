@@ -9,6 +9,7 @@ data = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath("data")))
 )
 
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         Ingredient.objects.all().delete()
@@ -19,15 +20,15 @@ class Command(BaseCommand):
                 for record in data_dict:
                     count += 1
                     name = record.get("name")
-                    measurement_unit=record.get("measurement_unit")
+                    measurement_unit = record.get("measurement_unit")
                     try:
                         Ingredient.objects.get_or_create(
                             name=name,
                             measurement_unit=measurement_unit
                         )
                     except:
-                        print ('Ошибка импорта', record)
-                    
+                        print('Ошибка импорта', record)
+
                 print("Загрузка ингридиентов завершена! "
                       f"Загружено товаров: {Ingredient.objects.all().count()}")
             except Exception as er:
