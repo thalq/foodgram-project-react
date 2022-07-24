@@ -57,34 +57,3 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
-
-
-# class Subscribe(models.Model):
-#     """
-#     Модель подписок
-#     """
-#     user = models.ForeignKey(
-#         User,
-#         verbose_name='Подписчик',
-#         on_delete=models.CASCADE,
-#         related_name='subscribers'
-#     )
-#     author = models.ForeignKey(
-#         User,
-#         verbose_name='Автор',
-#         on_delete=models.CASCADE,
-#         related_name='authors'
-#     )
-
-#     class Meta:
-#         verbose_name = 'Подписка'
-#         verbose_name_plural = 'Подписки'
-#         constraints = (
-#             models.CheckConstraint(
-#                 check=~models.Q(user=models.F('author')),
-#                 name='\nНельзя подписаться на себя\n',
-#             ),
-#         )
-
-#     def __str__(self) -> str:
-#         return f'{self.user} подписан на {self.author}'
