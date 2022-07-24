@@ -5,9 +5,23 @@ from users.models import User
 
 
 class Tag(models.Model):
-    name = models.CharField('Имя', max_length=200, unique = True)
-    slug = models.SlugField('Слаг', max_length=200, unique = True)
-    color = models.CharField('Цвет', max_length=7, null = True, blank=True)
+    name = models.CharField(
+        'Имя',
+        max_length=200,
+        unique = True,
+    )
+    slug = models.SlugField(
+        'Слаг',
+        max_length=200,
+        unique = True,
+    )
+    color = models.CharField(
+        'Цвет',
+        max_length=7,
+        null = True,
+        blank=True,
+        default='#736283',
+    )
 
     class Meta():
         verbose_name = 'тег'
@@ -95,7 +109,7 @@ class IngredientInRecipe(models.Model):
         Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ингредиент',
-        related_name='ingredients_in_recipe',
+        related_name='ingredients_amount',
     )
     recipe = models.ForeignKey(
         Recipe,
@@ -116,7 +130,7 @@ class IngredientInRecipe(models.Model):
     
     def __str__(self):
         return (
-            f'{self.ingredient.name}'
+            f'{self.ingredient}'
             f'{self.amount} {self.ingredient.measurement_unit}'
         )
 

@@ -1,9 +1,7 @@
 from django.contrib.auth import get_user_model
-from django.db import models
 from django.db.models import F, Sum
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
-from django_filters import rest_framework
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserViewSet
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
@@ -13,13 +11,12 @@ from rest_framework.response import Response
 from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
                                    HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED)
 
-from api.serializers import (IngredientSerializer, RecipeSerializer,
-                             ShortRecipeSerializer, TagSerializer,
-                             UserSerializer, UserSubscribeSerializer)
-
 from .filters import RecipeFilter
-from .mixins import CreateDeleteMixin
 from .paginators import LimitPageNumberPagination
+from .serializers import (IngredientSerializer, RecipeCreateSerializer,
+                          RecipeSerializer, ShortRecipeSerializer,
+                          TagSerializer, UserSerializer,
+                          UserSubscribeSerializer)
 
 User = get_user_model()
 
@@ -110,8 +107,16 @@ class RecipeViewSet(viewsets.ModelViewSet, AddDeleteViewMixin):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     pagination_class = LimitPageNumberPagination
     additional_serializer = ShortRecipeSerializer
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PATCH', 'PUT']:
+            return RecipeCreateSerializer
+        return RecipeSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
     @action(
         methods=('POST', 'DELETE',),
