@@ -5,6 +5,9 @@ from users.models import User
 
 
 class Tag(models.Model):
+    """
+    Модель для тегов.
+    """
     name = models.CharField(
         'Имя',
         max_length=200,
@@ -33,6 +36,9 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    """
+    Модель для ингредиентов.
+    """
     name = models.CharField('Название иградиента', max_length=200)
     measurement_unit = models.CharField('Ед. измерения', max_length=200)
 
@@ -52,6 +58,9 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    """
+    Модель для рецептов.
+    """
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientInRecipe',
@@ -106,6 +115,9 @@ class Recipe(models.Model):
 
 
 class IngredientInRecipe(models.Model):
+    """
+    модель для ингредиентов в рецепте.
+    """
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,

@@ -41,6 +41,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для поля рецептов в списке подписок.
+    """
     class Meta:
         model = Recipe
         fields = 'id', 'name', 'image', 'cooking_time',
@@ -48,6 +51,9 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 
 class UserSubscribeSerializer(UserSerializer):
+    """
+    Сериализатор для списка подписок.
+    """
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -107,7 +113,6 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
@@ -115,6 +120,10 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientRecipeCreateSerializer(IngredientSerializer):
+    """
+    Сериализатор для добавления поля ингредиентов при создании
+    и обновлении рецепта.
+    """
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all()
     )
@@ -175,6 +184,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(RecipeSerializer):
+    """
+    Сериализатор для создания и обновления рецепта.
+    """
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
     )
