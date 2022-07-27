@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from django.core.management.utils import get_random_secret_key
+
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,7 +11,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY') or get_random_secret_key()
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', default=False)
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'djoser',
     'django_filters',
+    'colorfield',
 
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
@@ -63,11 +65,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', 'postgres'),
+        'USER': os.getenv('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'postgres'),
+        'HOST': os.getenv('DB_HOST', 'db'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
@@ -106,8 +111,10 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'PERMISSIONS': {
-        'user':  ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
-        'user_list':  (
+        'user': (
+            'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        ),
+        'user_list': (
             'rest_framework.permissions.IsAuthenticatedOrReadOnly',
         ),
     },
@@ -118,6 +125,7 @@ DJOSER = {
         'user_create': 'api.serializers.UserSerializer',
     },
 }
+
 
 LANGUAGE_CODE = 'ru-RU'
 

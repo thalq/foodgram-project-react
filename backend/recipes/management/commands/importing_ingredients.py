@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 from django.core.management.base import BaseCommand
 
@@ -13,7 +13,9 @@ data = os.path.dirname(
 class Command(BaseCommand):
     def handle(self, *args, **options):
         Ingredient.objects.all().delete()
-        with open(f"{data}/foodgram-project-react/data/ingredients.json", "r") as j:
+        with open(
+            f"{data}/foodgram-project-react/data/ingredients.json", "r"
+        ) as j:
             data_dict = json.loads(j.read())
             count = 0
             try:

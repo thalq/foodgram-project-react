@@ -4,19 +4,20 @@ from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserViewSet
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.status import (HTTP_201_CREATED, HTTP_204_NO_CONTENT,
-                                   HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED)
+from rest_framework.status import (
+    HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,)
 
 from .filters import RecipeFilter
 from .paginators import LimitPageNumberPagination
 from .serializers import (IngredientSerializer, RecipeCreateSerializer,
                           RecipeSerializer, ShortRecipeSerializer,
                           TagSerializer, UserSerializer,
-                          UserSubscribeSerializer)
+                          UserSubscribeSerializer,)
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 
 User = get_user_model()
 
@@ -81,8 +82,8 @@ class UserViewSet(DjoserViewSet, AddDeleteViewMixin):
             )
             return self.get_paginated_response(serializer.data)
         serializer = UserSubscribeSerializer(
-                authors, many=True, context={'request': request}
-            )
+            authors, many=True, context={'request': request}
+        )
         return Response(serializer.data)
 
 
@@ -168,6 +169,6 @@ class RecipeViewSet(viewsets.ModelViewSet, AddDeleteViewMixin):
         user = request.user
         authors = user.favorites.all()
         serializer = RecipeSerializer(
-                authors, many=True, context={'request': request}
+            authors, many=True, context={'request': request}
         )
         return Response(serializer.data)

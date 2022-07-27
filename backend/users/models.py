@@ -16,7 +16,8 @@ class User(AbstractUser):
     )
     username = models.CharField(
         'Имя пользователя',
-        max_length=150, unique=True,
+        max_length=150,
+        unique=True,
         help_text='Обязательное поле. Имя пользователя должно быть уникальным'
     )
     first_name = models.CharField(
@@ -50,7 +51,7 @@ class User(AbstractUser):
                 name='\nИмя пользователя слишком короткое\n',
             ),
             models.UniqueConstraint(
-                fields=['username', 'email'],
+                fields=('username', 'email',),
                 name='\nУникальность пары имя пользователя-адрес email\n',
             ),
         )

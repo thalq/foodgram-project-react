@@ -3,9 +3,10 @@ from string import hexdigits
 from django.contrib.auth import get_user_model
 from django.db.models import F
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
+
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 
 User = get_user_model()
 

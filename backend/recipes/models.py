@@ -1,6 +1,9 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+
+from colorfield.fields import ColorField
 from foodgram.constants import MIN_COOKING_TIME
+
 from users.models import User
 
 
@@ -18,13 +21,7 @@ class Tag(models.Model):
         max_length=200,
         unique=True,
     )
-    color = models.CharField(
-        'Цвет',
-        max_length=7,
-        null=True,
-        blank=True,
-        default='#736283',
-    )
+    color = color = ColorField(default='#FF0000')
 
     class Meta():
         verbose_name = 'тег'
