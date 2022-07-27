@@ -15,20 +15,28 @@
 - Регистрация пользователя.
 ###### `POST` http://158.160.4.74/api/users/
 <br />
+
+
 - Профиль пользователя.
 ###### `GET` http://158.160.4.74/api/users/{id}/
 <br />
+
+
 - Текущий пользователь.
 ###### `GET` http://158.160.4.74/api/users/me/
 <br />
+
 - Изменение пароля.
 ###### `POST` http://158.160.4.74/api/users/set_password/
 <br />
+
 - Получить токен авторизации.
 ###### `POST` http://158.160.4.74/api/auth/token/login/
 <br />
+
 - Удаление токена.
 ###### `POST` http://158.160.4.74/api/auth/token/logout/
+<br />
 
 **Получение JWT-токена**
 - Получение JWT-токена в обмен на username и confirmation code.
