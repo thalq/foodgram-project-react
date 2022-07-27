@@ -9,7 +9,7 @@ services:
       - ./.env
 
   backend:
-    image: tanyahalq1/foodgram:latest
+    image: tanyahalq1/foodgram_backend:latest
     command: >
       bash -c "python manage.py makemigrations &&
       python manage.py migrate &&
@@ -25,7 +25,7 @@ services:
       - ./.env
 
   frontend:
-    image: tanyahalq1/foodgram:latest
+    image: tanyahalq1/foodgram_frontend:latest
     volumes:
       - ./frontend/:/app/result_build/
     depends_on:
@@ -34,7 +34,7 @@ services:
   nginx:
     image: nginx:1.23
     ports:
-      - "8003:80"
+      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ./frontend/build:/usr/share/nginx/html/
