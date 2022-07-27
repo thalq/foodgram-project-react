@@ -137,7 +137,7 @@
 ## :wrench: Установка
 Клонируем репозиторий:
 
-```$ git clone git@github.com:thalq/foodgram-project-react.git
+```$ git clone git@github.com:thalq/foodgram-project-react.git```
 
 Подключаемся к серверу через ssh и перейдите в каталог
 /home/< username >/foodgram/
