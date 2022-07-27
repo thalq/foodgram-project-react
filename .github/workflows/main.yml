@@ -95,3 +95,37 @@ jobs:
         context: frontend/
         push: true
         tags: ${{ secrets.DOCKER_USER }}/foodgram_frontend:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [
+      copy_infra_to_server,
+      build_push_backend_to_DockerHub,
+      build_push_frontend_to_DockerHub
+    ]
+    steps:
+    - name: remote ssh commands to deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.HOST_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd foodgram/
+          docker-compose down
+          docker rm foodgram_frontend_1
+          docker rm foodgram_backend_1
+          docker rmi ${{ secrets.DOCKER_USER }}/foodgram_frontend
+          docker rmi ${{ secrets.DOCKER_USER }}/foodgram_backend
+          docker-compose up -d
+  
+  send_message:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+    - name: send message
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: ${{ github.workflow }} успешно выполнен!
