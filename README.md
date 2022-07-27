@@ -27,7 +27,7 @@
 <br />
 
 - Изменение пароля.
-###### `POST` http://158.160.4.74/api/users/set_password/
+###### _`POST` http://158.160.4.74/api/users/set_password/_
 <br />
 
 - Получить токен авторизации.
