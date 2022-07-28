@@ -74,12 +74,14 @@ class UserViewSet(DjoserViewSet, AddDeleteViewMixin):
     )
     def subscriptions(self, request):
         user = request.user
+        if user.is_anonymous:
+            return Response(status=HTTP_401_UNAUTHORIZED)
         authors = user.subscribing.all()
         pages = self.paginate_queryset(authors)
         serializer = UserSubscribeSerializer(
             pages, many=True, context={'request': request}
         )
-        return Response(serializer.data)
+        return self.get_paginated_response(serializer.data)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
