@@ -76,13 +76,8 @@ class UserViewSet(DjoserViewSet, AddDeleteViewMixin):
         user = request.user
         authors = user.subscribing.all()
         pages = self.paginate_queryset(authors)
-        if pages:
-            serializer = UserSubscribeSerializer(
-                pages, many=True, context={'request': request}
-            )
-            return self.get_paginated_response(serializer.data)
         serializer = UserSubscribeSerializer(
-            authors, many=True, context={'request': request}
+            pages, many=True, context={'request': request}
         )
         return Response(serializer.data)
 
