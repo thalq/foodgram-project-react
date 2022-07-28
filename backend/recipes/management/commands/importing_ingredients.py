@@ -14,7 +14,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         Ingredient.objects.all().delete()
         with open(
-            f"{data}/foodgram-project-react/data/ingredients.json", "r"
+            # f"{data}/foodgram-project-react/data/ingredients.json", "r"
+            f"{data}/data/ingredients.json", "r"
         ) as j:
             data_dict = json.loads(j.read())
             count = 0
