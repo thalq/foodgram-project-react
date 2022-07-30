@@ -13,7 +13,7 @@ class RecipeFilter(FilterSet):
         field_name='tags__slug',
     )
     author = filters.AllValuesFilter(
-        field_name='author__username',
+        field_name='author__id',
     )
     is_in_shopping_cart = ChoiceFilter(
         choices=RECIPE_CHOICES,
