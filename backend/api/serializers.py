@@ -234,7 +234,7 @@ class RecipeCreateSerializer(RecipeSerializer):
                 )
             ingredien_duplicate_validate.append(ingredient['id'])
         return data
-    
+
     def validate_name(self, data):
         """
         Это нам понадобится для проверки создания

@@ -1,10 +1,7 @@
-from django.contrib import admin
 from django.core.validators import (MaxValueValidator, MinLengthValidator,
                                     MinValueValidator, RegexValidator,
                                     validate_slug,)
 from django.db import models
-from django.utils.html import format_html
-from django.utils.safestring import mark_safe
 
 from colorfield.fields import ColorField
 
@@ -20,8 +17,8 @@ class Tag(models.Model):
         max_length=200,
         unique=True,
         validators=[
-             MinLengthValidator(1, 'Введите название тэга'),
-         ],
+            MinLengthValidator(1, 'Введите название тэга'),
+        ],
 
     )
     slug = models.SlugField(
@@ -29,9 +26,9 @@ class Tag(models.Model):
         max_length=200,
         unique=True,
         validators=[
-             MinLengthValidator(3, 'Должно состоять минимум из 3х символов'),
-             validate_slug,
-         ]
+            MinLengthValidator(3, 'Должно состоять минимум из 3х символов'),
+            validate_slug,
+        ]
     )
     color = color = ColorField(default='#FF0000')
 
@@ -41,11 +38,12 @@ class Tag(models.Model):
         ordering = ('name',)
 
     def save(self, *args, **kwargs):
-         """
-         Превод слага в нижний регистр при сохранении
-         """
-         self.slug = self.slug.lower()
-         return super(Tag, self).save(*args, **kwargs)
+        """
+        Превод слага в нижний регистр при сохранении
+        """
+        self.slug = self.slug.lower()
+        return super(Tag, self).save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
