@@ -1,7 +1,6 @@
 from django.contrib import admin
-from django.core.validators import (MaxValueValidator, MinLengthValidator,
-                                    MinValueValidator, RegexValidator,
-                                    validate_slug,)
+from django.core.validators import (MinLengthValidator, MinValueValidator,
+                                    RegexValidator, validate_slug,)
 from django.db import models
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
