@@ -220,6 +220,30 @@ class RecipeCreateSerializer(RecipeSerializer):
             return False
         return user.carts.filter(id=obj.id).exists()
 
+    def validate(self, data):
+        ingredients = data.get('ingredients')
+        if not ingredients:
+            raise ValidationError(
+                {'ingredients': 'В рецепте нужны ингредиенты'}
+            )
+        ingredien_duplicate_validate = []
+        for ingredient in ingredients:
+            if ingredient['id'] in ingredien_duplicate_validate:
+                raise ValidationError(
+                    f'"{ingredient}" уже добавлен в рецепт'
+                )
+            ingredien_duplicate_validate.append(ingredient['id'])
+        return data
+    
+    def validate_name(self, data):
+        """
+        Это нам понадобится для проверки создания
+        рецептов с одинаковым названием.
+        Реализация валидации во views.
+        """
+        name = " ".join(data.split()).strip().lower()
+        return name
+
     def create_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:
             IngredientInRecipe.objects.get_or_create(

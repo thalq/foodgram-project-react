@@ -1,5 +1,10 @@
-from django.core.validators import MinValueValidator
+from django.contrib import admin
+from django.core.validators import (MaxValueValidator, MinLengthValidator,
+                                    MinValueValidator, RegexValidator,
+                                    validate_slug,)
 from django.db import models
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from colorfield.fields import ColorField
 
@@ -14,11 +19,19 @@ class Tag(models.Model):
         'Имя',
         max_length=200,
         unique=True,
+        validators=[
+             MinLengthValidator(1, 'Введите название тэга'),
+         ],
+
     )
     slug = models.SlugField(
         'Слаг',
         max_length=200,
         unique=True,
+        validators=[
+             MinLengthValidator(3, 'Должно состоять минимум из 3х символов'),
+             validate_slug,
+         ]
     )
     color = color = ColorField(default='#FF0000')
 
@@ -27,6 +40,12 @@ class Tag(models.Model):
         verbose_name_plural = 'теги'
         ordering = ('name',)
 
+    def save(self, *args, **kwargs):
+         """
+         Превод слага в нижний регистр при сохранении
+         """
+         self.slug = self.slug.lower()
+         return super(Tag, self).save(*args, **kwargs)
     def __str__(self):
         return self.name
 
@@ -35,8 +54,24 @@ class Ingredient(models.Model):
     """
     Модель для ингредиентов.
     """
-    name = models.CharField('Название иградиента', max_length=200)
-    measurement_unit = models.CharField('Ед. измерения', max_length=200)
+    name = models.CharField(
+        'Название иградиента',
+        max_length=200,
+        validators=[
+            MinLengthValidator(
+                3, 'Название ингредиента должно быть более 3х символов'
+            )
+        ]
+    )
+    measurement_unit = models.CharField(
+        'Ед. измерения',
+        max_length=200,
+        validators=[
+            MinLengthValidator(
+                1, 'Введите единицу измерения'
+            )
+        ]
+    )
 
     class Meta():
         verbose_name = 'Ингредиент'
@@ -89,14 +124,39 @@ class Recipe(models.Model):
         auto_now_add=True,
     )
     image = models.ImageField('Изображение', upload_to='images/')
-    name = models.CharField('Название', max_length=200)
+    name = models.CharField(
+        'Название',
+        max_length=200,
+        validators=(
+            MinLengthValidator(
+                1, 'Название рецепта слишком короткое'
+            ),
+            RegexValidator(
+                '^[a-zA-Zа-яА-Я ]+$',
+                (
+                    'Название рецепта содержит недопустимые символы'
+                )
+            )
+        )
+    )
     text = models.TextField('Описание рецепта',)
     cooking_time = models.PositiveIntegerField(
         'Время приготовления в минутах',
         validators=(
             MinValueValidator(
                 1,
-                'Время приготовления не может быть менее одной минуты.'
+                'Минимальное значение 1 минута'
+            ),
+            MaxValueValidator(
+                300,
+                'Максимальное значение 300 минут'
+            ),
+            RegexValidator(
+                '^[0-9]+$',
+                (
+                    'Время приготовления может быть '
+                    'только числом от 1 до 300'
+                )
             ),
         ),
     )
@@ -128,7 +188,22 @@ class IngredientInRecipe(models.Model):
     )
     amount = models.PositiveIntegerField(
         'Количество',
-        default=0
+        default=0,
+        validators=(
+            MinValueValidator(
+                1, 'Минимальное значение 1'
+            ),
+            MaxValueValidator(
+                10000, 'Максимальное значение 10000'
+            ),
+            RegexValidator(
+                '^[0-9]+$',
+                (
+                    'Количество ингредиента может быть '
+                    'только числом от 1 до 10000'
+                )
+            ),
+        ),
     )
 
     class Meta:
