@@ -1,8 +1,10 @@
-from django.core.validators import MinValueValidator
+from django.contrib import admin
+from django.core.validators import (MaxValueValidator, MinLengthValidator,
+                                    MinValueValidator, RegexValidator,
+                                    validate_slug,)
 from django.db import models
-
-from colorfield.fields import ColorField
-from foodgram.constants import MIN_COOKING_TIME
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from users.models import User
 
@@ -13,20 +15,60 @@ class Tag(models.Model):
     """
     name = models.CharField(
         'Имя',
-        max_length=200,
+        max_length=150,
         unique=True,
+        validators=[
+            MinLengthValidator(1, 'Введите название тэга'),
+        ],
     )
     slug = models.SlugField(
         'Слаг',
         max_length=200,
         unique=True,
+        validators=[
+            MinLengthValidator(3, 'Должно состоять минимум из 3х символов'),
+            validate_slug,
+        ]
     )
-    color = color = ColorField(default='#FF0000')
+    color = models.CharField(
+        verbose_name='Цветовой HEX-код',
+        max_length=7,
+        blank=True,
+        null=True,
+        default='#',
+        unique=True,
+        validators=[
+            RegexValidator(
+                "^#([A-Fa-f0-9]{6})$",
+                "введите код цвета в формате #F08080"
+            ),
+        ],
+    )
 
     class Meta():
         verbose_name = 'тег'
         verbose_name_plural = 'теги'
         ordering = ('name',)
+
+    @admin.display
+    def color_code(self):
+        """
+        Отображение цвета тега в админ панели
+        """
+        return mark_safe(
+            format_html(
+                '<span style="color: {};">{}</span>',
+                self.color,
+                self.color,
+            )
+        )
+
+    def save(self, *args, **kwargs):
+        """
+        Превод слага в нижний регистр при сохранении
+        """
+        self.slug = self.slug.lower()
+        return super(Tag, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -36,8 +78,23 @@ class Ingredient(models.Model):
     """
     Модель для ингредиентов.
     """
-    name = models.CharField('Название иградиента', max_length=200)
-    measurement_unit = models.CharField('Ед. измерения', max_length=200)
+    name = models.CharField(
+        'Название иградиента',
+        max_length=200,
+        validators=[
+            MinLengthValidator(
+                2, 'Название должно быть минимум из 3х символов')
+        ]
+    )
+    measurement_unit = models.CharField(
+        'Ед. измерения',
+        max_length=200,
+        validators=[
+            MinLengthValidator(
+                1, 'Введите обозначение единицы измерения'
+            )
+        ]
+    )
 
     class Meta():
         verbose_name = 'Ингредиент'
@@ -96,7 +153,7 @@ class Recipe(models.Model):
         'Время приготовления в минутах',
         validators=(
             MinValueValidator(
-                MIN_COOKING_TIME,
+                1,
                 'Время приготовления не может быть менее одной минуты.'
             ),
         ),
